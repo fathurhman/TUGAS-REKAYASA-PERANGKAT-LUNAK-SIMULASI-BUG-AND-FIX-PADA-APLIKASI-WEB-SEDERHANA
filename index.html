@@ -40,7 +40,7 @@ td{padding:4px 0;vertical-align:top} td:first-child{color:var(--mu);width:34%}
 
   <div class="card">
     <h2>1. Coba Program</h2>
-    <div class="rule">Aturan: pencarian harus menemukan roti <b>tanpa peduli huruf besar atau kecil</b>, dan spasi di awal/akhir diabaikan.</div>
+    <div class="rule">Aturan: pencarian harus menemukan roti <b>tanpa peduli huruf besar atau kecil</b>, spasi di awal/akhir diabaikan, kata kunci boleh cocok di bagian mana pun nama menu, <b>semua</b> menu yang cocok ditampilkan, dan kolom kosong ditolak.</div>
     <label for="kata">Masukkan nama roti yang dicari</label>
     <input id="kata" type="text" value="roti" autocomplete="off">
     <div class="btns">
@@ -52,26 +52,11 @@ td{padding:4px 0;vertical-align:top} td:first-child{color:var(--mu);width:34%}
       <div class="box"><h3 style="color:var(--bad)">✗ Sebelum / BUG</h3><div class="res" id="rBug"><span class="hint">Klik “Jalankan BUG”.</span></div></div>
       <div class="box"><h3 style="color:var(--ok)">✓ Sesudah / FIX</h3><div class="res" id="rFix"><span class="hint">Klik “Jalankan FIX”.</span></div></div>
     </div>
-    <p class="hint" style="margin:10px 0 0">Daftar menu: Roti Tawar, Croissant, Donat Cokelat, Roti Sobek Keju. Coba juga: <code>Roti</code>, <code>CROISSANT</code>, <code>donat</code>, <code> roti </code>.</p>
+    <p class="hint" style="margin:10px 0 0">Daftar menu: Roti Tawar, Croissant, Donat Cokelat, Roti Sobek Keju. Coba juga: <code>Roti</code>, <code>CROISSANT</code>, <code>donat</code>, <code> roti </code>, <code>Tawar</code>, dan kolom kosong.</p>
   </div>
 
   <div class="card">
-    <h2>2. Perhatikan Kode JavaScript</h2>
-    <div class="two">
-      <div><div class="lbl b">Sebelum / Bug</div>
-<pre>function cari(nama, kata) {
-  return nama.includes(kata);
-}</pre></div>
-      <div><div class="lbl f">Sesudah / Fix</div>
-<pre>function cari(nama, kata) {
-  return nama.toLowerCase()
-    .includes(kata.trim().toLowerCase());
-}</pre></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>3. Bug Report #01</h2>
+    <h2>2. Bug Report #01</h2>
     <table>
       <tr><td>Judul</td><td>[Bug] Pencarian menu gagal jika huruf besar/kecil berbeda</td></tr>
       <tr><td>Severity / Priority</td><td>Medium / High</td></tr>
@@ -82,32 +67,141 @@ td{padding:4px 0;vertical-align:top} td:first-child{color:var(--mu);width:34%}
       <tr><td>Environment</td><td>Chrome, Windows, BakeFlow v1.0.0</td></tr>
       <tr><td>Tipe</td><td>Corrective maintenance</td></tr>
     </table>
+    <h2 style="margin-top:16px">Kode JavaScript</h2>
+    <div class="two">
+      <div><div class="lbl b">Sebelum / Bug</div>
+<pre>function cari(nama, kata) {
+  const n = nama;            // #01: tanpa toLowerCase()
+  const k = kata;            // #01: tanpa trim() &amp; toLowerCase()
+  return n.startsWith(k);    // #04: startsWith, bukan includes
+}</pre></div>
+      <div><div class="lbl f">Sesudah / Fix</div>
+<pre>function cari(nama, kata) {
+  const n = nama.toLowerCase();
+  const k = kata.trim().toLowerCase();
+  return n.includes(k);
+}</pre></div>
+    </div>
   </div>
 
   <div class="card">
-    <h2>4. CHANGELOG</h2>
+    <h2>3. Bug Report #02</h2>
+    <table>
+      <tr><td>Judul</td><td>[Bug] Pencarian dengan kolom kosong tidak ditolak</td></tr>
+      <tr><td>Severity / Priority</td><td>Low / Medium</td></tr>
+      <tr><td>Reproduce</td><td>1. Buka BakeFlow<br>2. Kosongkan kolom pencarian<br>3. Klik Jalankan BUG</td></tr>
+      <tr><td>Expected</td><td>Muncul pesan “Masukkan kata kunci.”</td></tr>
+      <tr><td>Actual</td><td>Roti Tawar ditampilkan seolah-olah cocok, padahal tidak ada kata kunci.</td></tr>
+      <tr><td>Akar masalah</td><td>String kosong selalu cocok dengan startsWith(), dan tidak ada validasi input.</td></tr>
+      <tr><td>Environment</td><td>Chrome, Windows, BakeFlow v1.0.0</td></tr>
+      <tr><td>Tipe</td><td>Corrective maintenance</td></tr>
+    </table>
+    <h2 style="margin-top:16px">Kode JavaScript</h2>
+    <div class="two">
+      <div><div class="lbl b">Sebelum / Bug</div>
+<pre>function cariMenu(kata) {
+  // #02: tidak ada validasi input kosong
+  const h = MENU.find(m =&gt; cari(m, kata)); // #03: find()
+  return h ? [h] : [];                     // hanya 1 hasil
+}</pre></div>
+      <div><div class="lbl f">Sesudah / Fix</div>
+<pre>function cariMenu(kata) {
+  if (!kata.trim()) return "Masukkan kata kunci.";
+  return MENU.filter(m =&gt; cari(m, kata));
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>4. Bug Report #03</h2>
+    <table>
+      <tr><td>Judul</td><td>[Bug] Hanya satu hasil pencarian yang ditampilkan</td></tr>
+      <tr><td>Severity / Priority</td><td>Medium / High</td></tr>
+      <tr><td>Reproduce</td><td>1. Buka BakeFlow<br>2. Ketik “Roti” (R huruf besar)<br>3. Klik Jalankan BUG</td></tr>
+      <tr><td>Expected</td><td>Roti Tawar dan Roti Sobek Keju ditemukan.</td></tr>
+      <tr><td>Actual</td><td>Hanya Roti Tawar yang muncul.</td></tr>
+      <tr><td>Akar masalah</td><td>Memakai find() yang berhenti di kecocokan pertama, bukan filter().</td></tr>
+      <tr><td>Environment</td><td>Chrome, Windows, BakeFlow v1.0.0</td></tr>
+      <tr><td>Tipe</td><td>Corrective maintenance</td></tr>
+    </table>
+    <h2 style="margin-top:16px">Kode JavaScript</h2>
+    <div class="two">
+      <div><div class="lbl b">Sebelum / Bug</div>
+<pre>function cariMenu(kata) {
+  // #02: tidak ada validasi input kosong
+  const h = MENU.find(m =&gt; cari(m, kata)); // #03: find()
+  return h ? [h] : [];                     // hanya 1 hasil
+}</pre></div>
+      <div><div class="lbl f">Sesudah / Fix</div>
+<pre>function cariMenu(kata) {
+  if (!kata.trim()) return "Masukkan kata kunci.";
+  return MENU.filter(m =&gt; cari(m, kata));
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>5. Bug Report #04</h2>
+    <table>
+      <tr><td>Judul</td><td>[Bug] Pencarian gagal jika kata kunci bukan awal nama menu</td></tr>
+      <tr><td>Severity / Priority</td><td>Medium / Medium</td></tr>
+      <tr><td>Reproduce</td><td>1. Buka BakeFlow<br>2. Ketik “Tawar” (T huruf besar)<br>3. Klik Jalankan BUG</td></tr>
+      <tr><td>Expected</td><td>Roti Tawar ditemukan.</td></tr>
+      <tr><td>Actual</td><td>Muncul “Menu tidak ditemukan.”</td></tr>
+      <tr><td>Akar masalah</td><td>Memakai startsWith() sehingga hanya awal nama yang dicocokkan, bukan includes().</td></tr>
+      <tr><td>Environment</td><td>Chrome, Windows, BakeFlow v1.0.0</td></tr>
+      <tr><td>Tipe</td><td>Corrective maintenance</td></tr>
+    </table>
+    <h2 style="margin-top:16px">Kode JavaScript</h2>
+    <div class="two">
+      <div><div class="lbl b">Sebelum / Bug</div>
+<pre>function cari(nama, kata) {
+  const n = nama;            // #01: tanpa toLowerCase()
+  const k = kata;            // #01: tanpa trim() &amp; toLowerCase()
+  return n.startsWith(k);    // #04: startsWith, bukan includes
+}</pre></div>
+      <div><div class="lbl f">Sesudah / Fix</div>
+<pre>function cari(nama, kata) {
+  const n = nama.toLowerCase();
+  const k = kata.trim().toLowerCase();
+  return n.includes(k);
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>6. CHANGELOG</h2>
 <pre>## [1.1.0]
 ### Fixed
 - Pencarian menu tidak lagi peka huruf besar/kecil dan mengabaikan spasi
+- Kolom pencarian kosong ditolak dengan pesan “Masukkan kata kunci.” (#02)
+- Semua menu yang cocok ditampilkan, tidak lagi hanya hasil pertama (#03)
+- Kata kunci cocok di bagian mana pun nama menu, tidak lagi hanya dari awal (#04)
 
 ## [1.0.0]
-- Versi awal; pencarian peka huruf besar/kecil</pre>
+- Versi awal; pencarian peka huruf besar/kecil dan spasi di awal/akhir tidak diabaikan (#01)
+- Kolom pencarian kosong tidak ditolak (#02)
+- Hanya hasil pertama yang ditampilkan (#03)
+- Kata kunci hanya cocok dari awal nama menu (#04)</pre>
   </div>
 </div>
 
 <script>
 const MENU=["Roti Tawar","Croissant","Donat Cokelat","Roti Sobek Keju"];
 
-// Versi BUG
-function cariBug(nama,kata){return nama.includes(kata);}
+// Versi BUG (#01 tanpa lowercase/trim, #04 startsWith)
+function cariBug(nama,kata){const n=nama;const k=kata;return n.startsWith(k);}
 // Versi FIX
-function cariFix(nama,kata){return nama.toLowerCase().includes(kata.trim().toLowerCase());}
+function cariFix(nama,kata){const n=nama.toLowerCase();const k=kata.trim().toLowerCase();return n.includes(k);}
+// Pencarian menu: BUG (#02 tanpa validasi, #03 find) dan FIX
+function cariMenuBug(kata){const h=MENU.find(m=>cariBug(m,kata));return h?[h]:[];}
+function cariMenuFix(kata){if(!kata.trim())return"Masukkan kata kunci.";return MENU.filter(m=>cariFix(m,kata));}
 
 function jalan(v){
   const kata=document.getElementById("kata").value;
-  const fn=v==="bug"?cariBug:cariFix;
-  const hasil=MENU.filter(m=>fn(m,kata));
+  const hasil=v==="bug"?cariMenuBug(kata):cariMenuFix(kata);
   const el=document.getElementById(v==="bug"?"rBug":"rFix");
+  if(typeof hasil==="string"){el.innerHTML='<div class="err">'+hasil+'</div>';return;}
   el.innerHTML=hasil.length
     ?'<div class="good">Ditemukan '+hasil.length+' menu:</div>'+hasil.map(h=>"<div>• "+h+"</div>").join("")
     :'<div class="err">Menu tidak ditemukan.</div>';
