@@ -1,73 +1,59 @@
 # BakeFlow – Toko Roti Hangat
 
-BakeFlow adalah aplikasi web sederhana untuk mencari menu roti pada sebuah toko roti. Proyek ini dibuat untuk mensimulasikan **BUG dan FIX** serta menerapkan **pipeline CI** menggunakan GitHub Actions.
+BakeFlow adalah aplikasi web interaktif sederhana yang dirancang untuk mensimulasikan penanganan **BUG dan FIX** dalam mata kuliah Rekayasa Perangkat Lunak[cite: 10]. Aplikasi ini mendemonstrasikan empat jenis perbaikan (*corrective maintenance*) pada fitur pencarian menu roti.
 
-Daftar menu: Roti Tawar, Croissant, Donat Cokelat, Roti Sobek Keju.
+Daftar menu: Roti Tawar, Croissant, Donat Cokelat, Roti Sobek Keju[cite: 10].
 
-# Fitur
+## Fitur Utama
 
-- Mencari menu roti berdasarkan nama
-- Demo perbandingan versi BUG dan versi FIX (`index.html`)
-- Pengujian otomatis untuk fungsi pencarian (`cari.test.js`)
+- **Pencarian Menu Interaktif**: Mencari menu roti berdasarkan berbagai kondisi input[cite: 10].
+- **Simulasi Bug & Fix (`index.html`)**: Perbandingan langsung secara visual antara kode bermasalah (*Sebelum / BUG*) dan kode setelah diperbaiki (*Sesudah / FIX*)[cite: 10].
+- **Dokumentasi Bug Report Terstruktur**: Memuat 4 skenario perbaikan bug lengkap dengan langkah reproduksi, akar masalah, dan level prioritasnya.
 
-# Struktur Berkas
+## Struktur Berkas
 
 | Berkas | Fungsi |
 |---|---|
-| `index.html` | Tampilan aplikasi dan demo BUG/FIX |
-| `cari.js` | Fungsi pencarian menu |
-| `cari.test.js` | Unit test untuk fungsi pencarian |
-| `package.json` | Konfigurasi proyek dan perintah test |
-| `.github/workflows/ci.yml` | Workflow CI GitHub Actions |
+| `index.html` | Antarmuka aplikasi web dan pusat demo simulasi 4 skenario Bug & Fix |
+| `README.md` | Dokumentasi lengkap penjelasan proyek dan panduan penggunaan |
 
-# Menjalankan Tes
+## Panduan Menjalankan Aplikasi
 
-Prasyarat: Node.js (versi 22 atau yang lebih baru).
+1. Buka folder proyek di **VS Code**.
+2. Jalankan aplikasi menggunakan ekstensi **Live Server** di VS Code atau buka langsung file `index.html` di browser (Chrome/Edge)[cite: 1, 10].
+3. Uji tombol **"Jalankan BUG"** dan **"Jalankan FIX"** pada kolom simulasi untuk melihat perbedaan perilaku sistem[cite: 12].
 
-npm test
+---
 
-Tidak perlu `npm install` karena proyek tidak memakai dependensi tambahan.
+## Ringkasan 4 Skenario Bug dan Perbaikan
 
-# Penjelasan CI
+Aplikasi ini mendemonstrasikan empat perbaikan utama (*Corrective Maintenance*):
 
-Proyek ini memakai GitHub Actions (`.github/workflows/ci.yml`). Workflow berjalan otomatis setiap ada push ke branch `main` atau pull request. Langkahnya:
+### 1. Bug #01: Sensitivitas Huruf Besar/Kecil & Spasi
+* **Masalah (v1.0.0):** Pencarian gagal jika huruf tidak persis sama atau terdapat spasi di tepi kata[cite: 9, 12].
+* **Perbaikan (v1.1.0):** Menambahkan fungsi pembersihan spasi (`trim()`) dan penyeragaman huruf (`toLowerCase()`)[cite: 9, 10].
 
-1. Checkout: mengambil kode terbaru dari repository.
-2. Setup Node.js: menyiapkan Node.js versi 22.
-3. `npm test`: menjalankan semua unit test.
+### 2. Bug #02: Validasi Kolom Kosong
+* **Masalah (v1.0.0):** Kolom pencarian yang dibiarkan kosong tetap memproses pencarian tanpa peringatan[cite: 13].
+* **Perbaikan (v1.1.0):** Menambahkan validasi pengecekan input kosong (`if (!kata.trim()) return "Masukkan kata kunci."`)[cite: 13].
 
-Hasil dapat dilihat di tab Actions pada repository: ✅ hijau jika semua tes lulus, ❌ merah jika ada tes yang gagal.
+### 3. Bug #03: Batasan Hasil Pencarian (*Find* vs *Filter*)
+* **Masalah (v1.0.0):** Menggunakan metode array `find()` sehingga hanya menampilkan **satu hasil pertama** yang cocok[cite: 14].
+* **Perbaikan (v1.1.0):** Mengubah metode menjadi `filter()` agar seluruh menu yang sesuai kriteria dapat ditampilkan[cite: 10, 14].
 
-# Ringkasan Error dan Perbaikan
+### 4. Bug #04: Batasan Pencocokan Awalan (*StartsWith* vs *Includes*)
+* **Masalah (v1.0.0):** Menggunakan `startsWith()` sehingga kata kunci hanya bisa ditemukan jika diketik dari awal nama menu[cite: 15].
+* **Perbaikan (v1.1.0):** Mengubah metode menjadi `includes()` agar kata kunci dapat ditemukan di bagian mana saja (depan, tengah, atau belakang)[cite: 10, 15].
 
-Error (v1.0.0): pencarian gagal untuk kata `roti` yang ditulis dengan huruf kecil. Penyebabnya, fungsi `cari` membandingkan teks apa adanya, sehingga `"roti"` tidak cocok dengan `"Roti Tawar"`. Spasi di awal atau akhir juga tidak diabaikan. Akibatnya 3 dari 4 tes gagal dan run CI berstatus gagal.
+---
 
-js
-// Sebelum (BUG)
-function cari(nama, kata) {
-  return nama.includes(kata);
-}
+## Changelog
 
-## Langkah perbaikan (v1.1.0):
+### [1.1.0] - Versi Perbaikan
+- Pencarian menu tidak lagi peka huruf besar/kecil dan mengabaikan spasi tepi (#01)[cite: 16].
+- Kolom pencarian kosong berhasil ditolak dengan pesan peringatan (#02)[cite: 16].
+- Semua menu yang cocok berhasil ditampilkan menggunakan `filter()` (#03)[cite: 16].
+- Pencarian fleksibel di bagian mana pun pada nama menu menggunakan `includes()` (#04)[cite: 16].
 
-1. Mereproduksi bug: mengetik `roti` huruf kecil, menu tidak ditemukan.
-2. Menemukan akar masalah: teks tidak diseragamkan sebelum dibandingkan.
-3. Menambahkan `toLowerCase()` agar huruf besar/kecil tidak dibedakan, dan `trim()` agar spasi diabaikan.
-4. Menjalankan `npm test`, semua tes lulus.
-5. Push ke GitHub, run CI berstatus sukses.
-
-js
-// Sesudah (FIX)
-function cari(nama, kata) {
-  return nama.toLowerCase().includes(kata.trim().toLowerCase());
-}
-
-# Bukti CI
-
-- Run gagal (sebelum perbaikan): https://github.com/fathurhman/TUGAS-REKAYASA-PERANGKAT-LUNAK-SIMULASI-BUG-AND-FIX-PADA-APLIKASI-WEB-SEDERHANA/actions/runs/43696903728
-- Run sukses (sesudah perbaikan): https://github.com/fathurhman/TUGAS-REKAYASA-PERANGKAT-LUNAK-SIMULASI-BUG-AND-FIX-PADA-APLIKASI-WEB-SEDERHANA/actions/runs/43697297710
-
-# Changelog
-
-- **1.1.0**: Fixed, pencarian tidak lagi peka huruf besar/kecil dan mengabaikan spasi.
-- **1.0.0**: Versi awal, pencarian masih peka huruf besar/kecil.
+### [1.0.0] - Versi Awal (Buggy)
+- Rilis awal aplikasi dengan berbagai kendala logika pencarian dan validasi input[cite: 16].
