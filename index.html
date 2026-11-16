@@ -148,23 +148,21 @@ td{padding:4px 0;vertical-align:top} td:first-child{color:var(--mu);width:34%}
       <tr><td>Reproduce</td><td>1. Buka BakeFlow<br>2. Ketik “Tawar” (T huruf besar)<br>3. Klik Jalankan BUG</td></tr>
       <tr><td>Expected</td><td>Roti Tawar ditemukan.</td></tr>
       <tr><td>Actual</td><td>Muncul “Menu tidak ditemukan.”</td></tr>
-      <tr><td>Akar masalah</td><td>Memakai startsWith() sehingga hanya awal nama yang dicocokkan, bukan includes().</td></tr>
+      <tr><td>Akar masalah</td><td>Memakai <code>startsWith()</code> sehingga hanya awal nama yang dicocokkan, bukan <code>includes()</code>.</td></tr>
       <tr><td>Environment</td><td>Chrome, Windows, BakeFlow v1.0.0</td></tr>
       <tr><td>Tipe</td><td>Corrective maintenance</td></tr>
     </table>
-    <h2 style="margin-top:16px">Kode JavaScript</h2>
+    <h2 style="margin-top:16px">Kode JavaScript (Pencocokan startsWith vs includes)</h2>
     <div class="two">
       <div><div class="lbl b">Sebelum / Bug</div>
 <pre>function cari(nama, kata) {
-  const n = nama;            // #01: tanpa toLowerCase()
-  const k = kata;            // #01: tanpa trim() &amp; toLowerCase()
-  return n.startsWith(k);    // #04: startsWith, bukan includes
+  // BUG #04: Hanya mencocokkan awalan kata dengan startsWith()
+  return nama.startsWith(kata);
 }</pre></div>
       <div><div class="lbl f">Sesudah / Fix</div>
 <pre>function cari(nama, kata) {
-  const n = nama.toLowerCase();
-  const k = kata.trim().toLowerCase();
-  return n.includes(k);
+  // FIX #04: Mencocokkan kata di bagian mana pun dengan includes()
+  return nama.includes(kata);
 }</pre></div>
     </div>
   </div>
@@ -173,13 +171,13 @@ td{padding:4px 0;vertical-align:top} td:first-child{color:var(--mu);width:34%}
     <h2>6. CHANGELOG</h2>
 <pre>## [1.1.0]
 ### Fixed
-- Pencarian menu tidak lagi peka huruf besar/kecil dan mengabaikan spasi
+- Pencarian menu tidak lagi peka huruf besar/kecil dan mengabaikan spasi (#01)
 - Kolom pencarian kosong ditolak dengan pesan “Masukkan kata kunci.” (#02)
 - Semua menu yang cocok ditampilkan, tidak lagi hanya hasil pertama (#03)
 - Kata kunci cocok di bagian mana pun nama menu, tidak lagi hanya dari awal (#04)
 
 ## [1.0.0]
-- Versi awal; pencarian peka huruf besar/kecil dan spasi di awal/akhir tidak diabaikan (#01)
+- Versi awal: pencarian menggunakan huruf besar/kecil dan spasi di awal/akhir tidak diabaikan (#01)
 - Kolom pencarian kosong tidak ditolak (#02)
 - Hanya hasil pertama yang ditampilkan (#03)
 - Kata kunci hanya cocok dari awal nama menu (#04)</pre>
@@ -190,9 +188,13 @@ td{padding:4px 0;vertical-align:top} td:first-child{color:var(--mu);width:34%}
 const MENU=["Roti Tawar","Croissant","Donat Cokelat","Roti Sobek Keju"];
 
 // Versi BUG (#01 tanpa lowercase/trim, #04 startsWith)
-function cariBug(nama,kata){const n=nama;const k=kata;return n.startsWith(k);}
+function cariBug(nama, kata) {
+  return nama.startsWith(kata);
+}
 // Versi FIX
-function cariFix(nama,kata){const n=nama.toLowerCase();const k=kata.trim().toLowerCase();return n.includes(k);}
+function cariFix(nama, kata) {
+  return nama.includes(kata);
+}
 // Pencarian menu: BUG (#02 tanpa validasi, #03 find) dan FIX
 function cariMenuBug(kata){const h=MENU.find(m=>cariBug(m,kata));return h?[h]:[];}
 function cariMenuFix(kata){if(!kata.trim())return"Masukkan kata kunci.";return MENU.filter(m=>cariFix(m,kata));}
