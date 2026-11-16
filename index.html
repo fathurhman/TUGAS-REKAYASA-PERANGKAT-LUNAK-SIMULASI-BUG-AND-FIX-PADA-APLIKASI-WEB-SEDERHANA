@@ -51,7 +51,7 @@ td{padding:4px 0;vertical-align:top} td:first-child{color:var(--mu);width:34%}
       <div class="box"><h3 style="color:var(--bad)">✗ Sebelum / BUG</h3><div class="res" id="rBug"><span class="hint">Klik “Jalankan BUG”.</span></div></div>
       <div class="box"><h3 style="color:var(--ok)">✓ Sesudah / FIX</h3><div class="res" id="rFix"><span class="hint">Klik “Jalankan FIX”.</span></div></div>
     </div>
-    <p class="hint" style="margin:10px 0 0">Daftar menu: Roti Tawar, Croissant, Donat Cokelat, Roti Sobek Keju. Coba juga: <code>Roti</code>, <code>CROISSANT</code>, <code>donat</code>, <code> roti </code>, <code>Tawar</code>, dan kolom kosong.</p>
+    <p class="hint" style="margin:10px 0 0">Daftar menu: Roti Tawar, Croissant, Donat Cokelat, Roti Sobek Keju, roti. Coba juga: <code>Roti</code>, <code>CROISSANT</code>, <code>donat</code>, <code> roti </code>, <code>Tawar</code>, dan kolom kosong.</p>
   </div>
 
   <div class="card">
@@ -184,33 +184,48 @@ td{padding:4px 0;vertical-align:top} td:first-child{color:var(--mu);width:34%}
 </div>
 
 <script>
-const MENU=["Roti Tawar","Croissant","Donat Cokelat","Roti Sobek Keju"];
+const MENU=["Roti Tawar", "Croissant", "Donat Cokelat", "Roti Sobek Keju", "roti"];
 
-// Versi BUG (#01 tanpa lowercase/trim, #04 startsWith)
+// Versi BUG (Simulasi masalah: peka huruf besar/kecil, pakai find, pakai startsWith, tanpa validasi)
 function cariBug(nama, kata) {
-  return nama.startsWith(kata);
+  return nama.startsWith(kata); 
 }
+
+function cariMenuBug(kata) {
+  const h = MENU.find(m => cariBug(m, kata)); 
+  return h ? [h] : [];
+}
+
 // Versi FIX
 function cariFix(nama, kata) {
-  return nama.includes(kata);
+  return nama.toLowerCase().includes(kata.trim().toLowerCase());
 }
-// Pencarian menu: BUG (#02 tanpa validasi, #03 find) dan FIX
-function cariMenuBug(kata){const h=MENU.find(m=>cariBug(m,kata));return h?[h]:[];}
-function cariMenuFix(kata){if(!kata.trim())return"Masukkan kata kunci.";return MENU.filter(m=>cariFix(m,kata));}
+
+// Pencarian menu: FIX
+function cariMenuFix(kata) {
+  if (!kata || !kata.trim()) return "Masukkan kata kunci.";
+  return MENU.filter(m => cariFix(m, kata));
+}
 
 function jalan(v){
-  const kata=document.getElementById("kata").value;
-  const hasil=v==="bug"?cariMenuBug(kata):cariMenuFix(kata);
-  const el=document.getElementById(v==="bug"?"rBug":"rFix");
-  if(typeof hasil==="string"){el.innerHTML='<div class="err">'+hasil+'</div>';return;}
-  el.innerHTML=hasil.length
-    ?'<div class="good">Ditemukan '+hasil.length+' menu:</div>'+hasil.map(h=>"<div>• "+h+"</div>").join("")
-    :'<div class="err">Menu tidak ditemukan.</div>';
+  const kata = document.getElementById("kata").value;
+  const hasil = v === "bug" ? cariMenuBug(kata) : cariMenuFix(kata);
+  const el = document.getElementById(v === "bug" ? "rBug" : "rFix");
+  
+  if (typeof hasil === "string") {
+    el.innerHTML = '<div class="err">' + hasil + '</div>';
+    return;
+  }
+  
+  el.innerHTML = hasil.length > 0
+    ? '<div class="good">Ditemukan ' + hasil.length + ' menu:</div>' + hasil.map(h => "<div>• " + h + "</div>").join("")
+    : '<div class="err">Menu tidak ditemukan.</div>';
 }
+
 function reset(){
-  document.getElementById("kata").value="roti";
-  document.getElementById("rBug").innerHTML='<span class="hint">Klik “Jalankan BUG”.</span>';
-  document.getElementById("rFix").innerHTML='<span class="hint">Klik “Jalankan FIX”.</span>';
+  document.getElementById("kata").value = "roti";
+  document.getElementById("rBug").innerHTML = '<span class="hint">Klik “Jalankan BUG”.</span>';
+  document.getElementById("rFix").innerHTML = '<span class="hint">Klik “Jalankan FIX”.</span>';
 }
 </script>
 </body>
